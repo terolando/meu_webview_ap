@@ -25,8 +25,8 @@ jobs:
       - name: Generate App Icons
         run: flutter pub run flutter_launcher_icons
 
-      - name: Generate App Name
-        run: flutter pub run flutter_launcher_name:main
+      - name: Set App Name Natively
+        run: plutil -replace CFBundleDisplayName -string "Pega lá" ios/Runner/Info.plist
 
       - name: Build iOS (No Codesign)
         run: flutter build ios --release --no-codesign
