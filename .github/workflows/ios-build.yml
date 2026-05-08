@@ -25,5 +25,8 @@ jobs:
       - name: Generate App Icons
         run: flutter pub run flutter_launcher_icons
 
+      - name: Generate App Name
+        run: flutter pub run flutter_launcher_name:main
+
       - name: Build iOS (No Codesign)
         run: flutter build ios --release --no-codesign
