@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'dart:async';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:gal/gal.dart';
 
 void main() {
   runApp(const MyApp());
@@ -99,6 +103,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
             }
           },
           onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url.toLowerCase().endsWith('.mp4')) {
+              _downloadVideo(request.url);
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
         ),
       )
       ..loadRequest(Uri.parse('https://pegala.tv.br/indexapp.html'));
@@ -123,5 +134,47 @@ class _WebViewScreenState extends State<WebViewScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _downloadVideo(String url) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Iniciando o download do vídeo...')),
+    );
+
+    try {
+      final hasAccess = await Gal.requestAccess(toAlbum: true);
+      if (!hasAccess) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Permissão negada para salvar na galeria.')),
+          );
+        }
+        return;
+      }
+
+      final tempDir = await getTemporaryDirectory();
+      final fileName = 'video_${DateTime.now().millisecondsSinceEpoch}.mp4';
+      final tempPath = '${tempDir.path}/$fileName';
+
+      await Dio().download(url, tempPath);
+      await Gal.putVideo(tempPath);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vídeo salvo na galeria com sucesso!')),
+        );
+      }
+      
+      final file = File(tempPath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao salvar o vídeo.')),
+        );
+      }
+    }
   }
 }

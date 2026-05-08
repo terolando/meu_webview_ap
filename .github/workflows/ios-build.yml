@@ -25,8 +25,11 @@ jobs:
       - name: Generate App Icons
         run: flutter pub run flutter_launcher_icons
 
-      - name: Set App Name Natively
-        run: plutil -replace CFBundleDisplayName -string "Pega lá" ios/Runner/Info.plist
+      - name: Set App Name and Permissions Natively
+        run: |
+          plutil -replace CFBundleDisplayName -string "Pega lá" ios/Runner/Info.plist
+          plutil -insert NSPhotoLibraryAddUsageDescription -string "Necessário para salvar os vídeos baixados no seu dispositivo." ios/Runner/Info.plist
+          plutil -insert NSDocumentsFolderUsageDescription -string "Necessário para processar os arquivos de vídeo baixados." ios/Runner/Info.plist
 
       - name: Build iOS (No Codesign)
         run: flutter build ios --release --no-codesign
