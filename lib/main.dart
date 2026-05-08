@@ -78,6 +78,7 @@ class WebViewScreen extends StatefulWidget {
 class _WebViewScreenState extends State<WebViewScreen> {
   late final WebViewController _controller;
   bool _isLoading = true;
+  final ValueNotifier<bool> _canGoBack = ValueNotifier(false);
 
   @override
   void initState() {
@@ -95,11 +96,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
               });
             }
           },
-          onPageFinished: (String url) {
+          onPageFinished: (String url) async {
+            final canGoBack = await _controller.canGoBack();
             if (mounted) {
               setState(() {
                 _isLoading = false;
               });
+              _canGoBack.value = canGoBack;
             }
           },
           onWebResourceError: (WebResourceError error) {},
@@ -120,7 +123,21 @@ class _WebViewScreenState extends State<WebViewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pega lá'),
-        toolbarHeight: 0, // Hides AppBar to give fullscreen feel but keep SafeArea handling
+        leading: ValueListenableBuilder<bool>(
+          valueListenable: _canGoBack,
+          builder: (context, canGoBack, child) {
+            if (canGoBack) {
+              return IconButton(
+                icon: const Icon(Icons.arrow_back_ios),
+                onPressed: () {
+                  _controller.goBack();
+                },
+              );
+            } else {
+              return const SizedBox.shrink();
+            }
+          },
+        ),
       ),
       body: SafeArea(
         child: Stack(
