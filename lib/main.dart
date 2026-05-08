@@ -49,19 +49,14 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(
-              Icons.web,
-              size: 100,
-              color: Colors.blue,
+          children: [
+            Image.asset(
+              'assets/splash_logo.png',
+              width: 250,
+              fit: BoxFit.contain,
             ),
-            SizedBox(height: 20),
-            CircularProgressIndicator(),
-            SizedBox(height: 20),
-            Text(
-              'Pegala',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+            const SizedBox(height: 40),
+            const CircularProgressIndicator(),
           ],
         ),
       ),
